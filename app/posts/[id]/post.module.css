@@ -19,7 +19,7 @@
   text-decoration: none;
 }
 
-.note {
+.post {
   width: min(100% - 40px, 680px);
   margin: 0 auto;
   padding: 72px 0;
@@ -39,7 +39,7 @@
   text-underline-offset: 4px;
 }
 
-.note header {
+.post header {
   display: flex;
   align-items: center;
   gap: 12px;
@@ -60,16 +60,16 @@
   font-weight: 700;
 }
 
-.note h1,
-.note header p {
+.post h1,
+.post header p {
   margin: 0;
 }
 
-.note h1 {
+.post h1 {
   font-size: 15px;
 }
 
-.note header p {
+.post header p {
   margin-top: 4px;
   color: #76736b;
   font-size: 12px;
@@ -84,6 +84,12 @@
   white-space: pre-wrap;
 }
 
+.actions {
+  margin-top: 48px;
+  padding-top: 20px;
+  border-top: 1px solid #dedbd2;
+}
+
 .back:focus-visible,
 .nav a:focus-visible {
   outline: 2px solid #7b6446;
@@ -95,7 +101,7 @@
     padding: 22px 0;
   }
 
-  .note {
+  .post {
     padding-top: 48px;
   }
 

@@ -168,6 +168,13 @@
     #30363b;
 }
 
+.postFooter {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
 .postLink {
   display: inline-flex;
   align-items: center;

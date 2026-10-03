@@ -1,4 +1,5 @@
 import Link from "next/link";
+import LikeButton from "../components/like-button";
 import { type Post } from "../services/stream";
 import CreatePost from "./components/create-post";
 import styles from "./stream.module.css";
@@ -27,9 +28,12 @@ function FeedPost({ post }: { post: Post }) {
       <p className={styles.postText}>{post.text}</p>
       {post.media && <PostMedia type={post.media} />}
 
-      <Link className={styles.postLink} href={`/posts/${post.id}`}>
-        Open note <span aria-hidden="true">→</span>
-      </Link>
+      <footer className={styles.postFooter}>
+        <LikeButton postId={post.id} likes={post.likes} author={post.author} />
+        <Link className={styles.postLink} href={`/posts/${post.id}`}>
+          Open post <span aria-hidden="true">→</span>
+        </Link>
+      </footer>
     </article>
   );
 }
@@ -39,23 +43,23 @@ export default function Stream({ posts }: { posts: Post[] }) {
     <div className={styles.page}>
       <header className={styles.siteHeader}>
         <Link href="/stream" className={styles.brand}>
-          Notes
+          Posts
         </Link>
-        <span>A small shared notebook</span>
+        <span>A simple shared space</span>
       </header>
 
       <main className={styles.main}>
         <section className={styles.intro}>
           <p className={styles.eyebrow}>Shared thoughts</p>
           <h1>What’s on your mind?</h1>
-          <p>Write something down, or take a quiet look through recent notes.</p>
+          <p>Write something down, or take a quiet look through recent posts.</p>
         </section>
 
         <CreatePost />
 
-        <section className={styles.posts} aria-label="Recent notes">
+        <section className={styles.posts} aria-label="Recent posts">
           <div className={styles.sectionHeading}>
-            <h2>Recent notes</h2>
+            <h2>Recent posts</h2>
             <span>{posts.length}</span>
           </div>
           {posts.map((post) => (

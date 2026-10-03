@@ -3,10 +3,10 @@ import "./globals.css";
 
 export const metadata: Metadata = {
   title: {
-    default: "Notes",
-    template: "%s · Notes",
+    default: "Posts",
+    template: "%s · Posts",
   },
-  description: "A small shared notebook.",
+  description: "A simple shared space for posts.",
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {

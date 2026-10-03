@@ -10,7 +10,7 @@ function SubmitButton({ disabled }: { disabled: boolean }) {
 
   return (
     <button type="submit" disabled={disabled || pending}>
-      {pending ? "Saving…" : "Share note"}
+      {pending ? "Saving…" : "Share post"}
     </button>
   );
 }
@@ -21,14 +21,14 @@ export default function CreatePost() {
 
   return (
     <section className={styles.composer} aria-labelledby="composer-title">
-      <h2 id="composer-title">Add a note</h2>
+      <h2 id="composer-title">Add a post</h2>
       <form action={createPost}>
         <textarea
           value={text}
           onChange={(event) => setText(event.target.value)}
           name="text"
           placeholder="Write something worth remembering…"
-          aria-label="Note text"
+          aria-label="Post text"
           maxLength={500}
           rows={4}
           required

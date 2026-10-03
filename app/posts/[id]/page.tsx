@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import LikeButton from "../../components/like-button";
 import { getPostById } from "../../services/stream";
 import styles from "./post.module.css";
 
@@ -20,11 +21,11 @@ export default async function PostPage({ params }: PageProps<"/posts/[id]">) {
   return (
     <main className={styles.page}>
       <nav className={styles.nav}>
-        <Link href="/stream">Notes</Link>
+        <Link href="/stream">Posts</Link>
       </nav>
-      <article className={styles.note}>
+      <article className={styles.post}>
         <Link href="/stream" className={styles.back}>
-          ← All notes
+          ← All posts
         </Link>
         <header>
           <span className={styles.avatar} aria-hidden="true">
@@ -36,6 +37,9 @@ export default async function PostPage({ params }: PageProps<"/posts/[id]">) {
           </div>
         </header>
         <p className={styles.text}>{post.text}</p>
+        <footer className={styles.actions}>
+          <LikeButton postId={post.id} likes={post.likes} author={post.author} />
+        </footer>
       </article>
     </main>
   );

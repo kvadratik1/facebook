@@ -3,8 +3,8 @@ import Stream from "./stream";
 import { getPosts } from "../services/stream";
 
 export const metadata: Metadata = {
-  title: "Recent notes",
-  description: "Write and read notes in a simple shared space.",
+  title: "Recent posts",
+  description: "Write and read posts in a simple shared space.",
 };
 
 export default async function StreamPage() {
