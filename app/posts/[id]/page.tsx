@@ -1,8 +1,8 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import LikeButton from "../../components/like-button";
 import { getPostById } from "../../services/stream";
 import styles from "./post.module.css";
+import { toggleLikeButton } from "@/app/actions/posts";
 
 export default async function PostPage({ params }: PageProps<"/posts/[id]">) {
   const { id } = await params;
@@ -37,10 +37,13 @@ export default async function PostPage({ params }: PageProps<"/posts/[id]">) {
           </div>
         </header>
         <p className={styles.text}>{post.text}</p>
-        <footer className={styles.actions}>
-          <LikeButton postId={post.id} likes={post.likes} author={post.author} />
-        </footer>
       </article>
+      <form action={toggleLikeButton}>
+        <input type="hidden" name="id" value={post.id} />
+        <button type="submit">
+          {post.likes ? "Mark as not important" : "Mark as important"}
+        </button>
+      </form>
     </main>
   );
 }
