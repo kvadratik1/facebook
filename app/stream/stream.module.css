@@ -168,6 +168,10 @@
     #30363b;
 }
 
+.genericMedia {
+  background: linear-gradient(135deg, #8b877e, #4d504c);
+}
+
 .postFooter {
   display: flex;
   align-items: center;

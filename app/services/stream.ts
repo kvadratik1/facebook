@@ -1,15 +1,6 @@
-export type Post = {
-  id: number;
-  author: string;
-  initials: string;
-  avatar: string;
-  time: string;
-  text: string;
-  likes: number;
-  comments: number;
-  shares: number;
-  media?: "travel" | "design";
-};
+import type { Post } from "../db/schema";
+
+export type { Post } from "../db/schema";
 
 const seedPosts: Post[] = [
   {
@@ -46,6 +37,7 @@ const seedPosts: Post[] = [
     likes: 0,
     comments: 18,
     shares: 2,
+    media: null,
   },
 ];
 
@@ -72,6 +64,7 @@ export async function addPost(text: string): Promise<Post> {
     likes: 0,
     comments: 0,
     shares: 0,
+    media: null,
   };
 
   posts = [newPost, ...posts];

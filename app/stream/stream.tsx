@@ -5,9 +5,22 @@ import CreatePost from "./components/create-post";
 import styles from "./stream.module.css";
 
 function PostMedia({ type }: { type: NonNullable<Post["media"]> }) {
+  const mediaStyle =
+    type === "travel"
+      ? styles.travel
+      : type === "design"
+        ? styles.design
+        : styles.genericMedia;
+
   return (
-    <div className={`${styles.media} ${styles[type]}`} aria-hidden="true">
-      <span>{type === "travel" ? "Coastline study" : "Weekly prompt"}</span>
+    <div className={`${styles.media} ${mediaStyle}`} aria-hidden="true">
+      <span>
+        {type === "travel"
+          ? "Coastline study"
+          : type === "design"
+            ? "Weekly prompt"
+            : type}
+      </span>
     </div>
   );
 }
