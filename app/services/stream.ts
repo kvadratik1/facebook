@@ -1,83 +1,36 @@
-import type { Post } from "../db/schema";
+import { eq } from "drizzle-orm";
+import { db } from "../../db";
+import { posts } from "../../db/schema";
 
-export type { Post } from "../db/schema";
+export const getPosts = async () => {
+  return db.query.posts.findMany();
+};
 
-const seedPosts: Post[] = [
-  {
-    id: 1,
-    author: "Maya Chen",
-    initials: "MC",
-    avatar: "avatarCoral",
-    time: "2 hr",
-    text: "Finally made it to the coast. Nothing clears the head like salty air and an empty calendar. 🌊",
-    likes: 0,
-    comments: 36,
-    shares: 8,
-    media: "travel",
-  },
-  {
-    id: 2,
-    author: "The Design Club",
-    initials: "DC",
-    avatar: "avatarViolet",
-    time: "4 hr",
-    text: "This week’s creative prompt: redesign something you use every day. Keep it simple, thoughtful, and share your process—not just the polish.",
-    likes: 0,
-    comments: 24,
-    shares: 11,
-    media: "design",
-  },
-  {
-    id: 3,
-    author: "Noah Williams",
-    initials: "NW",
-    avatar: "avatarBlue",
-    time: "Yesterday",
-    text: "Small win: shipped the side project I’ve been quietly working on for the last six weekends. It isn’t perfect, but it’s out in the world. 🚀",
-    likes: 0,
-    comments: 18,
-    shares: 2,
-    media: null,
-  },
-];
+// export function addPost(text: string): Promise<Post> {
+//   const newPost: Post = {
+//     id: Date.now(),
+//     author: "Alex Turner",
+//     initials: "AT",
+//     avatar: "avatarGreen",
+//     time: "Just now",
+//     text,
+//     likes: 0,
+//     comments: 0,
+//     shares: 0,
+//     media: null,
+//   };
 
-let posts = [...seedPosts];
+//   posts = [newPost, ...posts];
+//   return { ...newPost };
+// }
 
-const wait = (milliseconds: number) =>
-  new Promise((resolve) => setTimeout(resolve, milliseconds));
+// export function getPostById(id: number): Post | undefined {
+//   return posts.find((post) => post.id === id);
+// }
 
-export async function getPosts(): Promise<Post[]> {
-  await wait(350);
-  return posts.map((post) => ({ ...post }));
-}
-
-export async function addPost(text: string): Promise<Post> {
-  await wait(250);
-
-  const newPost: Post = {
-    id: Date.now(),
-    author: "Alex Turner",
-    initials: "AT",
-    avatar: "avatarGreen",
-    time: "Just now",
-    text,
-    likes: 0,
-    comments: 0,
-    shares: 0,
-    media: null,
-  };
-
-  posts = [newPost, ...posts];
-  return { ...newPost };
-}
-
-export function getPostById(id: number): Post | undefined {
-  return posts.find((post) => post.id === id);
-}
-
-export function toggleLike(id: number) {
-  const post = posts.find((post) => post.id === id);
-  if (post) {
-    post.likes++;
-  }
-}
+// export function toggleLike(id: number) {
+//   const post = posts.find((post) => post.id === id);
+//   if (post) {
+//     post.likes++;
+//   }
+// }

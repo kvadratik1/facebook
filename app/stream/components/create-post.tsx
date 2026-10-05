@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useFormStatus } from "react-dom";
-import { createPost } from "../../actions/posts";
+//import { createPost } from "../../actions/posts";
 import styles from "./create-post.module.css";
 
 function SubmitButton({ disabled }: { disabled: boolean }) {
@@ -22,7 +22,7 @@ export default function CreatePost() {
   return (
     <section className={styles.composer} aria-labelledby="composer-title">
       <h2 id="composer-title">Add a post</h2>
-      <form action={createPost}>
+      {/* <form action={createPost}>
         <textarea
           value={text}
           onChange={(event) => setText(event.target.value)}
@@ -37,7 +37,7 @@ export default function CreatePost() {
           <span>{length}/500</span>
           <SubmitButton disabled={!text.trim()} />
         </div>
-      </form>
+      </form> */}
     </section>
   );
 }

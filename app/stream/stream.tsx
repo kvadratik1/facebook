@@ -1,5 +1,5 @@
 import Link from "next/link";
-import LikeButton from "../components/like-button";
+// import LikeButton from "../components/like-button";
 import { type Post } from "../services/stream";
 import CreatePost from "./components/create-post";
 import styles from "./stream.module.css";
@@ -9,8 +9,8 @@ function PostMedia({ type }: { type: NonNullable<Post["media"]> }) {
     type === "travel"
       ? styles.travel
       : type === "design"
-        ? styles.design
-        : styles.genericMedia;
+      ? styles.design
+      : styles.genericMedia;
 
   return (
     <div className={`${styles.media} ${mediaStyle}`} aria-hidden="true">
@@ -18,8 +18,8 @@ function PostMedia({ type }: { type: NonNullable<Post["media"]> }) {
         {type === "travel"
           ? "Coastline study"
           : type === "design"
-            ? "Weekly prompt"
-            : type}
+          ? "Weekly prompt"
+          : type}
       </span>
     </div>
   );
@@ -42,7 +42,7 @@ function FeedPost({ post }: { post: Post }) {
       {post.media && <PostMedia type={post.media} />}
 
       <footer className={styles.postFooter}>
-        <LikeButton postId={post.id} likes={post.likes} author={post.author} />
+        {/* <LikeButton postId={post.id} likes={post.likes} author={post.author} /> */}
         <Link className={styles.postLink} href={`/posts/${post.id}`}>
           Open post <span aria-hidden="true">→</span>
         </Link>
@@ -65,7 +65,9 @@ export default function Stream({ posts }: { posts: Post[] }) {
         <section className={styles.intro}>
           <p className={styles.eyebrow}>Shared thoughts</p>
           <h1>What’s on your mind?</h1>
-          <p>Write something down, or take a quiet look through recent posts.</p>
+          <p>
+            Write something down, or take a quiet look through recent posts.
+          </p>
         </section>
 
         <CreatePost />
