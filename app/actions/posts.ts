@@ -1,7 +1,7 @@
 "use server";
 
-import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
+import { toggleLike } from "../services/posts";
 // import { addPost } from "../services/stream";
 // import { toggleLike } from "../services/stream";
 
@@ -17,14 +17,14 @@ import { revalidatePath } from "next/cache";
 //   redirect("/stream");
 // };
 
-// export const toggleLikeButton = async (formData: FormData) => {
-//   const id = Number(formData.get("id"));
+export const toggleLikeButton = async (formData: FormData) => {
+  const id = Number(formData.get("id"));
 
-//   if (!Number.isSafeInteger(id)) {
-//     return;
-//   }
+  if (!Number.isSafeInteger(id) || id <= 0 || id > 2147483647) {
+    return;
+  }
 
-//   toggleLike(id);
-//   revalidatePath(`/posts/${id}`);
-//   revalidatePath("/stream");
-// };
+  await toggleLike(id);
+  revalidatePath(`/posts/${id}`);
+  revalidatePath("/stream");
+};

@@ -1,8 +1,8 @@
-import Link from "next/link"
-import { getUsers } from "../services/users"
+import Link from "next/link";
+import { getUsers } from "../services/users";
 
-const Users = async () => {
-  const users = await getUsers()
+export default async function Users() {
+  const users = await getUsers();
 
   return (
     <div>
@@ -10,10 +10,10 @@ const Users = async () => {
       <ul>
         {users.map((user) => (
           <li key={user.id}>
-            <Link href={/users/${user.id}}>{user.name}</Link>
+            <Link href={`/users/${user.id}`}>{user.name}</Link>
           </li>
         ))}
       </ul>
     </div>
-  )
+  );
 }

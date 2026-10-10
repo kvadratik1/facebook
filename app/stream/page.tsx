@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Stream from "./stream";
-import { getPosts } from "../services/stream";
+import { getPosts } from "../services/posts";
 
 export const metadata: Metadata = {
   title: "Recent posts",

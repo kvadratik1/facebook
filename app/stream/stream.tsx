@@ -1,6 +1,6 @@
 import Link from "next/link";
 // import LikeButton from "../components/like-button";
-import { type Post } from "../services/stream";
+import { type Post } from "../../db/schema";
 import CreatePost from "./components/create-post";
 import styles from "./stream.module.css";
 
