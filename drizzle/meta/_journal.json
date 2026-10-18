@@ -22,6 +22,13 @@
       "when": 1791627858135,
       "tag": "0002_noisy_stick",
       "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1792318845552,
+      "tag": "0003_luxuriant_dreaming_celestial",
+      "breakpoints": true
     }
   ]
 }

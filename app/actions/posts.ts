@@ -1,21 +1,26 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { toggleLike } from "../services/posts";
-// import { addPost } from "../services/stream";
-// import { toggleLike } from "../services/stream";
+import { redirect } from "next/navigation";
+import { toggleLike, addPost } from "../services/posts";
+import { getCurrentUser } from "../services/session";
 
-// export const createPost = async (formData: FormData) => {
-//   const value = formData.get("text");
+export const createPost = async (formData: FormData) => {
+  const user = await getCurrentUser();
+  if (!user) {
+    redirect("/login");
+  }
 
-//   if (typeof value !== "string" || !value.trim()) {
-//     return;
-//   }
+  const value = formData.get("text");
 
-//   await addPost(value.trim().slice(0, 500));
-//   revalidatePath("/stream");
-//   redirect("/stream");
-// };
+  if (typeof value !== "string" || !value.trim()) {
+    return;
+  }
+
+  await addPost(value.trim().slice(0, 500), user.id);
+  revalidatePath("/stream");
+  redirect("/stream");
+};
 
 export const toggleLikeButton = async (formData: FormData) => {
   const id = Number(formData.get("id"));
