@@ -5,7 +5,10 @@ import { redirect } from "next/navigation";
 import { toggleLike, addPost } from "../services/posts";
 import { getCurrentUser } from "../services/session";
 
-export const createPost = async (formData: FormData) => {
+export const createPost = async (
+  _prevState: { error: string },
+  formData: FormData
+) => {
   const user = await getCurrentUser();
   if (!user) {
     redirect("/login");
@@ -13,11 +16,20 @@ export const createPost = async (formData: FormData) => {
 
   const value = formData.get("text");
 
-  if (typeof value !== "string" || !value.trim()) {
-    return;
+  if (typeof value !== "string") {
+    return { error: "Please enter post text." };
   }
 
-  await addPost(value.trim().slice(0, 500), user.id);
+  const content = value.trim();
+  if (content.length > 500 || content.length < 2) {
+    return { error: "Post text must contain between 2 and 500 characters." };
+  }
+
+  if (/(nigger|faggot|hitler)/i.test(content)) {
+    return { error: "Post contains a blocked word." };
+  }
+
+  await addPost(content, user.id);
   revalidatePath("/stream");
   redirect("/stream");
 };

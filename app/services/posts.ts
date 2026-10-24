@@ -8,9 +8,6 @@ export const getPosts = async () => {
 
 export const addPost = async (text: string, userId: string): Promise<Post> => {
   const content = text.trim();
-  if (!content || content.length > 500) {
-    throw new Error("Post text must contain between 1 and 500 characters.");
-  }
 
   const user = await db.query.users.findFirst({
     where: eq(users.id, userId),

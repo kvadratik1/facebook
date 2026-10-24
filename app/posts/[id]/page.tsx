@@ -12,10 +12,6 @@ export default async function PostPage({
   const { id } = await params;
   const postId = Number(id);
 
-  if (!Number.isSafeInteger(postId) || postId <= 0 || postId > 2147483647) {
-    notFound();
-  }
-
   const post = await getPostById(postId);
   if (!post) {
     notFound();
@@ -35,13 +31,19 @@ export default async function PostPage({
             {post.initials}
           </span>
           <div>
-            <h1><Link href={`/users/${post.userId}`}>{post.author}</Link></h1>
+            <h1>
+              <Link href={`/users/${post.userId}`}>{post.author}</Link>
+            </h1>
             <p>{post.time}</p>
           </div>
         </header>
         <p className={styles.text}>{post.text}</p>
         <div className={styles.actions}>
-          <LikeButton postId={post.id} likes={post.likes} author={post.author} />
+          <LikeButton
+            postId={post.id}
+            likes={post.likes}
+            author={post.author}
+          />
         </div>
       </article>
     </main>
