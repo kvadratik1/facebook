@@ -6,7 +6,7 @@ export const getPosts = async () => {
   return db.query.posts.findMany();
 };
 
-export const addPost = async (text: string, userId: number): Promise<Post> => {
+export const addPost = async (text: string, userId: string): Promise<Post> => {
   const content = text.trim();
   if (!content || content.length > 500) {
     throw new Error("Post text must contain between 1 and 500 characters.");
@@ -51,7 +51,7 @@ export const toggleLike = async (id: number) => {
     .where(eq(posts.id, id));
 };
 
-export const getPostsByUserId = async (userId: number) => {
+export const getPostsByUserId = async (userId: string) => {
   return db.query.posts.findMany({
     where: eq(posts.userId, userId),
   });

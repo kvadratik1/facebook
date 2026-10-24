@@ -1,4 +1,4 @@
-import { pgTable, serial, text, integer } from "drizzle-orm/pg-core";
+import { pgTable, serial, text, integer, uuid } from "drizzle-orm/pg-core";
 
 import { relations } from "drizzle-orm";
 
@@ -13,7 +13,7 @@ export const posts = pgTable("posts", {
   comments: integer("comments").notNull().default(0),
   shares: integer("shares").notNull().default(0),
   media: text("media"),
-  userId: integer("user_id")
+  userId: uuid("user_id")
     .notNull()
     .references(() => users.id),
 });
@@ -22,7 +22,7 @@ export type Post = typeof posts.$inferSelect;
 export type NewPost = typeof posts.$inferInsert;
 
 export const users = pgTable("users", {
-  id: serial("id").primaryKey(),
+  id: uuid("id").defaultRandom().primaryKey(),
   username: text("username").notNull().unique(),
   name: text("name").notNull(),
   passwordHash: text("password_hash").notNull().default(""),
