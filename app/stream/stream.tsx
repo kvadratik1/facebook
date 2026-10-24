@@ -54,13 +54,6 @@ function FeedPost({ post }: { post: Post }) {
 export default function Stream({ posts }: { posts: Post[] }) {
   return (
     <div className={styles.page}>
-      <header className={styles.siteHeader}>
-        <Link href="/stream" className={styles.brand}>
-          Posts
-        </Link>
-        <span>A simple shared space</span>
-      </header>
-
       <main className={styles.main}>
         <section className={styles.intro}>
           <p className={styles.eyebrow}>Shared thoughts</p>

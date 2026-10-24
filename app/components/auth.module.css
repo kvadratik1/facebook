@@ -1,0 +1,23 @@
+.page { width: min(100% - 40px, 980px); margin: 0 auto; padding: 80px 0; display: grid; grid-template-columns: 1fr 1fr; gap: 90px; align-items: center; flex: 1; }
+.story { padding: 20px 0; }
+.eyebrow { font-size: 11px; text-transform: uppercase; letter-spacing: .16em; font-weight: 700; color: #7b6446; margin: 0 0 24px; }
+.story h1 { font: 400 clamp(42px, 5vw, 64px)/1.06 Georgia, serif; letter-spacing: -.04em; margin: 0 0 24px; }
+.description { color: #76736b; font-size: 16px; line-height: 1.8; max-width: 350px; }
+.note { border-top: 1px solid #dedbd2; margin-top: 44px; padding-top: 22px; color: #59694e; font: italic 19px/1.6 Georgia, serif; }
+.card { background: #fffefa; border: 1px solid #e2ded3; border-radius: 14px; padding: 36px; box-shadow: 0 12px 40px #39332006; }
+.card h2 { font: 400 28px Georgia, serif; margin: 0 0 10px; letter-spacing: -.02em; }
+.subtitle { margin: 0 0 28px; font-size: 13px; line-height: 1.6; color: #76736b; }
+.form { display: grid; gap: 20px; }
+.field { display: grid; gap: 8px; font-size: 12px; font-weight: 600; }
+.field input { width: 100%; min-width: 0; background: #fbfaf6; border: 1px solid #dedbd2; border-radius: 6px; padding: 12px 14px; font-size: 14px; font-weight: 400; color: #24231f; }
+.field input::placeholder { color: #969287; }
+.field input:focus { outline: 2px solid #6e8065; outline-offset: 2px; }
+.submit { width: 100%; border: 0; border-radius: 6px; background: #344b3d; color: white; padding: 14px; font-size: 14px; font-weight: 600; cursor: pointer; }
+.submit:hover { background: #26392d; }
+.submit:disabled { opacity: .6; cursor: wait; }
+.submit:focus-visible, .footer a:focus-visible { outline: 2px solid #6e8065; outline-offset: 4px; }
+.error { margin: 0; color: #a13232; font-size: 13px; line-height: 1.5; }
+.error:empty { display: none; }
+.footer { margin: 26px 0 0; padding-top: 22px; border-top: 1px solid #e9e5dc; color: #76736b; text-align: center; font-size: 12px; line-height: 1.7; }
+.footer a { color: #344b3d; font-weight: 600; text-underline-offset: 3px; }
+@media (max-width: 760px) { .page { grid-template-columns: 1fr; gap: 28px; max-width: 460px; padding: 36px 0 56px; } .story { padding: 0; } .story h1 { font-size: 42px; } .eyebrow { margin-bottom: 16px; } .description { max-width: none; margin-bottom: 0; } .note { display: none; } .card { padding: 28px 24px; } }
