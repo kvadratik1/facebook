@@ -1,30 +1,35 @@
 "use client";
 
 import { useActionState, useState } from "react";
-import { useFormStatus } from "react-dom";
 import { createPost } from "../../actions/posts";
 import styles from "./create-post.module.css";
-
-function SubmitButton({ disabled }: { disabled: boolean }) {
-  const { pending } = useFormStatus();
-
-  return (
-    <button type="submit" disabled={disabled || pending}>
-      {pending ? "Saving…" : "Share post"}
-    </button>
-  );
-}
+import { useNotification } from "../../components/NotificationContext";
 
 export default function CreatePost() {
-  const [state, formAction] = useActionState(createPost, { error: "" });
   const [text, setText] = useState("");
+  const { showNotification } = useNotification();
+  const [state, formAction, pending] = useActionState(
+    async (previousState: { error: string; success: boolean }, formData: FormData) => {
+      const result = await createPost(previousState, formData);
+
+      // Only celebrate and clear the draft after the server confirms the save.
+      if (result.success) {
+        showNotification("Post created!");
+        setText("");
+      }
+
+      return result;
+    },
+    { error: "", success: false },
+  );
   const length = text.length;
 
   return (
     <section className={styles.composer} aria-labelledby="composer-title">
       <h2 id="composer-title">Add a post</h2>
-      <form action={formAction}>
+      <form action={formAction} aria-busy={pending}>
         <textarea
+          disabled={pending}
           value={text}
           onChange={(event) => setText(event.target.value)}
           name="text"
@@ -38,7 +43,9 @@ export default function CreatePost() {
         <p aria-live="polite">{state.error}</p>
         <div className={styles.controls}>
           <span>{length}/500</span>
-          <SubmitButton disabled={text.trim().length < 2} />
+          <button type="submit" disabled={pending || text.trim().length < 2}>
+            {pending ? "Saving…" : "Share post"}
+          </button>
         </div>
       </form>
     </section>

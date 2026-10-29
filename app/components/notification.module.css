@@ -1,0 +1,31 @@
+.banner {
+  width: min(100% - 40px, 680px);
+  margin: 20px auto 0;
+  padding: 16px 20px;
+  border: 1px solid;
+  border-radius: 10px;
+  overflow-wrap: anywhere;
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.banner strong {
+  display: block;
+  font-size: 13px;
+}
+
+.banner p {
+  margin: 4px 0 0;
+}
+
+.success {
+  background: #edf3e9;
+  border-color: #c6d6be;
+  color: #344b3d;
+}
+
+.error {
+  background: #fff0ed;
+  border-color: #ecc7bf;
+  color: #8a3028;
+}

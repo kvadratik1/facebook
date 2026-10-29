@@ -6,7 +6,7 @@ import { toggleLike, addPost } from "../services/posts";
 import { getCurrentUser } from "../services/session";
 
 export const createPost = async (
-  _prevState: { error: string },
+  _prevState: { error: string; success: boolean },
   formData: FormData
 ) => {
   const user = await getCurrentUser();
@@ -17,21 +17,21 @@ export const createPost = async (
   const value = formData.get("text");
 
   if (typeof value !== "string") {
-    return { error: "Please enter post text." };
+    return { error: "Please enter post text.", success: false };
   }
 
   const content = value.trim();
   if (content.length > 500 || content.length < 2) {
-    return { error: "Post text must contain between 2 and 500 characters." };
+    return { error: "Post text must contain between 2 and 500 characters.", success: false };
   }
 
   if (/(nigger|faggot|hitler)/i.test(content)) {
-    return { error: "Post contains a blocked word." };
+    return { error: "Post contains a blocked word.", success: false };
   }
 
   await addPost(content, user.id);
   revalidatePath("/stream");
-  redirect("/stream");
+  return { error: "", success: true };
 };
 
 export const toggleLikeButton = async (formData: FormData) => {
