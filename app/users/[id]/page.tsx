@@ -1,6 +1,11 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { getUserById } from "../../services/users";
+import { getUserProfile } from "../../services/users";
+import { getPostsByUserId } from "../../services/posts";
+import { auth } from "../../auth";
+import ProfileHeader from "./components/profile-header";
+import ProfilePosts from "./components/profile-posts";
+import styles from "./profile.module.css";
 
 export default async function UserPage({
   params,
@@ -11,24 +16,20 @@ export default async function UserPage({
   if (!/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id)) {
     notFound();
   }
-  const user = await getUserById(id);
+  const user = await getUserProfile(id);
 
   if (!user) {
     notFound();
   }
 
+  const [posts, session] = await Promise.all([getPostsByUserId(user.id), auth()]);
+  const isOwner = session?.user?.email === user.username;
+
   return (
-    <div>
-      <h2>{user.name}</h2>
-      <p>Username: {user.username}</p>
-      <h3>Posts</h3>
-      <ul>
-        {user.posts.map((post) => (
-          <li key={post.id}>
-            <Link href={`/posts/${post.id}`}>{post.text}</Link>
-          </li>
-        ))}
-      </ul>
-    </div>
+    <main className={styles.page}>
+      <Link href="/users" className={styles.back}>← Back to people</Link>
+      <ProfileHeader profile={user} isOwner={isOwner} />
+      <ProfilePosts posts={posts} isOwner={isOwner} />
+    </main>
   );
 }
