@@ -1,4 +1,4 @@
-import { pgTable, serial, text, integer, uuid } from "drizzle-orm/pg-core";
+import { pgTable, serial, text, integer, uuid, varchar } from "drizzle-orm/pg-core";
 
 import { relations } from "drizzle-orm";
 
@@ -26,6 +26,11 @@ export const users = pgTable("users", {
   username: text("username").notNull().unique(),
   name: text("name").notNull(),
   passwordHash: text("password_hash").notNull().default(""),
+  bio: varchar("bio", { length: 160 }),
+  avatarUrl: text("avatar_url"),
+  coverImageUrl: text("cover_image_url"),
+  avatarPublicId: text("avatar_public_id"),
+  coverImagePublicId: text("cover_image_public_id"),
 });
 
 export const usersRelations = relations(users, ({ many }) => ({
