@@ -1,4 +1,4 @@
-import { pgTable, serial, text, integer, uuid, varchar, primaryKey } from "drizzle-orm/pg-core";
+import { pgTable, serial, text, integer, uuid, varchar, primaryKey, timestamp, index } from "drizzle-orm/pg-core";
 
 import { relations } from "drizzle-orm";
 
@@ -33,11 +33,40 @@ export const users = pgTable("users", {
   coverImagePublicId: text("cover_image_public_id"),
 });
 
-export const usersRelations = relations(users, ({ many }) => ({
-  posts: many(posts),
+export const comments = pgTable("comments", {
+  id: serial("id").primaryKey(),
+  text: text("text").notNull(),
+  userId: uuid("user_id").notNull().references(() => users.id),
+  postId: integer("post_id")
+    .notNull()
+    .references(() => posts.id, { onDelete: "cascade" }),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+}, (table) => [
+  index("comments_post_id_created_at_id_idx").on(table.postId, table.createdAt, table.id),
+]);
+
+export type Comment = typeof comments.$inferSelect;
+export type NewComment = typeof comments.$inferInsert;
+
+export const commentsRelations = relations(comments, ({ one }) => ({
+  user: one(users, {
+    fields: [comments.userId],
+    references: [users.id],
+  }),
+  post: one(posts, {
+    fields: [comments.postId],
+    references: [posts.id],
+  }),
 }));
 
-export const postsRelations = relations(posts, ({ one }) => ({
+export const usersRelations = relations(users, ({ many }) => ({
+  posts: many(posts),
+  comments: many(comments),
+}));
+
+export const postsRelations = relations(posts, ({ one, many }) => ({
+  // Keep the relationship distinct from the posts.comments counter column.
+  commentEntries: many(comments),
   user: one(users, {
     fields: [posts.userId],
     references: [users.id],
