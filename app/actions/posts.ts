@@ -2,7 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
-import { toggleLike, addPost } from "../services/posts";
+import { setPostLike, addPost } from "../services/posts";
 import { getCurrentUser } from "../services/session";
 
 export const createPost = async (
@@ -34,14 +34,26 @@ export const createPost = async (
   return { error: "", success: true };
 };
 
-export const toggleLikeButton = async (formData: FormData) => {
-  const id = Number(formData.get("id"));
+export const setLikeButton = async (_previous: { error: string }, formData: FormData) => {
+  const user = await getCurrentUser();
+  if (!user) redirect("/login");
 
-  if (!Number.isSafeInteger(id) || id <= 0 || id > 2147483647) {
-    return;
+  const id = Number(formData.get("id"));
+  const liked = formData.get("liked");
+  if (!Number.isSafeInteger(id) || id <= 0 || id > 2147483647 || (liked !== "true" && liked !== "false")) {
+    return { error: "Invalid like request." };
   }
 
-  await toggleLike(id);
+  let post;
+  try {
+    post = await setPostLike(id, user.id, liked === "true");
+  } catch {
+    return { error: "Could not save your like. Please try again." };
+  }
+  if (!post) return { error: "This post no longer exists." };
+
   revalidatePath(`/posts/${id}`);
   revalidatePath("/stream");
+  revalidatePath(`/users/${post.user_id}`);
+  return { error: "" };
 };

@@ -1,3 +1,4 @@
+import { getCurrentUser } from "../../services/session";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getPostById } from "../../services/posts";
@@ -12,7 +13,9 @@ export default async function PostPage({
   const { id } = await params;
   const postId = Number(id);
 
-  const post = await getPostById(postId);
+  if (!Number.isSafeInteger(postId) || postId <= 0 || postId > 2147483647) notFound();
+  const user = await getCurrentUser();
+  const post = await getPostById(postId, user?.id);
   if (!post) {
     notFound();
   }
@@ -42,6 +45,7 @@ export default async function PostPage({
           <LikeButton
             postId={post.id}
             likes={post.likes}
+            likedByUser={post.likedByUser}
             author={post.author}
           />
         </div>

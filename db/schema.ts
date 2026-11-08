@@ -1,4 +1,4 @@
-import { pgTable, serial, text, integer, uuid, varchar } from "drizzle-orm/pg-core";
+import { pgTable, serial, text, integer, uuid, varchar, primaryKey } from "drizzle-orm/pg-core";
 
 import { relations } from "drizzle-orm";
 
@@ -43,3 +43,11 @@ export const postsRelations = relations(posts, ({ one }) => ({
     references: [users.id],
   }),
 }));
+
+// One like per user per post; post-first key also supports post lookups.
+export const likes = pgTable("likes", {
+  postId: integer("post_id").notNull().references(() => posts.id, { onDelete: "cascade" }),
+  userId: uuid("user_id").notNull().references(() => users.id),
+}, (table) => [primaryKey({ columns: [table.postId, table.userId] })]);
+
+export type PostWithLike = Post & { likedByUser: boolean };

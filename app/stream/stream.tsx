@@ -1,6 +1,6 @@
 import Link from "next/link";
-// import LikeButton from "../components/like-button";
-import { type Post } from "../../db/schema";
+import LikeButton from "../components/like-button";
+import { type PostWithLike as Post } from "../../db/schema";
 import CreatePost from "./components/create-post";
 import styles from "./stream.module.css";
 
@@ -42,7 +42,7 @@ function FeedPost({ post }: { post: Post }) {
       {post.media && <PostMedia type={post.media} />}
 
       <footer className={styles.postFooter}>
-        {/* <LikeButton postId={post.id} likes={post.likes} author={post.author} /> */}
+        <LikeButton postId={post.id} likes={post.likes} author={post.author} likedByUser={post.likedByUser} />
         <Link className={styles.postLink} href={`/posts/${post.id}`}>
           Open post <span aria-hidden="true">→</span>
         </Link>

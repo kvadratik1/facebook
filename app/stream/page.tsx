@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { getCurrentUser } from "../services/session";
 import Stream from "./stream";
 import { getPosts } from "../services/posts";
 
@@ -8,6 +9,7 @@ export const metadata: Metadata = {
 };
 
 export default async function StreamPage() {
-  const posts = await getPosts();
+  const user = await getCurrentUser();
+  const posts = await getPosts(user?.id);
   return <Stream posts={posts} />;
 }
