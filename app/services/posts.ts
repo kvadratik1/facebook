@@ -3,8 +3,21 @@ import { db } from "../../db";
 import { posts, users, type Post } from "../../db/schema";
 
 export const getPosts = async () => {
-  return db.query.posts.findMany();
+  const result = await db.query.posts.findMany({
+    with: { user: { columns: { name: true } } },
+  });
+  return result.map(withCurrentAuthor);
 };
+
+// Author names on existing posts follow profile edits too.
+function withCurrentAuthor({ user, ...post }: Post & { user: { name: string } | null }): Post {
+  if (!user) return post;
+  return {
+    ...post,
+    author: user.name,
+    initials: user.name.trim().split(/\s+/).slice(0, 2).map(part => part[0]).join("").toUpperCase(),
+  };
+}
 
 export const addPost = async (text: string, userId: string): Promise<Post> => {
   const content = text.trim();
@@ -38,7 +51,11 @@ export const addPost = async (text: string, userId: string): Promise<Post> => {
 };
 
 export const getPostById = async (id: number): Promise<Post | undefined> => {
-  return db.query.posts.findFirst({ where: eq(posts.id, id) });
+  const post = await db.query.posts.findFirst({
+    where: eq(posts.id, id),
+    with: { user: { columns: { name: true } } },
+  });
+  return post ? withCurrentAuthor(post) : undefined;
 };
 
 export const toggleLike = async (id: number) => {

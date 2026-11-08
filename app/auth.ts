@@ -48,4 +48,16 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
   session: {
     strategy: "jwt",
   },
+  callbacks: {
+    async jwt({ token, trigger }) {
+      if (trigger === "update" && token.email) {
+        const profile = await db.query.users.findFirst({
+          where: eq(users.username, token.email),
+          columns: { name: true },
+        });
+        if (profile) token.name = profile.name;
+      }
+      return token;
+    },
+  },
 });
