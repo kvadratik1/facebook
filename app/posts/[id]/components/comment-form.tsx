@@ -1,20 +1,27 @@
 "use client";
 
 import { useActionState, useState } from "react";
-import { useRouter } from "next/navigation";
 import { createComment } from "../../../actions/comments";
+import type { CommentWithAuthor } from "../../../services/comments";
 import styles from "./comments.module.css";
 
-export default function CommentForm({ postId, page }: { postId: number; page: number }) {
+export default function CommentForm({ postId, author, onCommentPosted }: {
+  postId: number;
+  author: { id: string; name: string; avatarUrl: string | null };
+  onCommentPosted: (comment: CommentWithAuthor) => void;
+}) {
   const [text, setText] = useState("");
-  const router = useRouter();
   const [state, action, pending] = useActionState(
     async (previous: { error: string; success: boolean }, data: FormData) => {
       const result = await createComment(previous, data);
       if (result.success) {
         setText("");
-        // Newest comments are on page one; the action already refreshes its data.
-        if (page !== 1) router.replace(`/posts/${postId}?page=1#comments`);
+        if (result.comment) onCommentPosted({
+          ...result.comment,
+          createdAt: new Date(result.comment.createdAt),
+          author: author.name,
+          authorAvatarUrl: author.avatarUrl,
+        });
       }
       return result;
     },

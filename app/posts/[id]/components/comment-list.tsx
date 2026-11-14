@@ -1,14 +1,56 @@
+"use client";
+
 import Link from "next/link";
+import { useCallback, useEffect, useRef, useState } from "react";
 import Avatar from "../../../components/avatar";
-import type { CommentsPage } from "../../../services/comments";
+import type { CommentBatch, CommentWithAuthor } from "../../../services/comments";
 import styles from "./comments.module.css";
 
-export default function CommentList({ data, postId }: { data: CommentsPage; postId: number }) {
-  const { comments, page, pages } = data;
-  // Keep the navigation compact even when a post has hundreds of pages.
-  const visiblePages = [...new Set([1, page - 1, page, page + 1, pages])]
-    .filter(number => number >= 1 && number <= pages).sort((a, b) => a - b);
-  const pageUrl = (number: number) => `/posts/${postId}?page=${number}#comments`;
+function uniqueComments(comments: CommentWithAuthor[]) {
+  return [...new Map(comments.map(comment => [comment.id, comment])).values()];
+}
+
+export default function CommentList({ initialBatch, newComments, postId }: {
+  initialBatch: CommentBatch;
+  newComments: CommentWithAuthor[];
+  postId: number;
+}) {
+  const [loadedComments, setComments] = useState(initialBatch.comments);
+  const comments = uniqueComments([...newComments, ...loadedComments]);
+  const [cursor, setCursor] = useState(initialBatch.nextCursor);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+  const sentinel = useRef<HTMLDivElement>(null);
+  const inFlight = useRef(false);
+
+  const loadMore = useCallback(async () => {
+    if (!cursor || inFlight.current) return;
+    inFlight.current = true;
+    setLoading(true);
+    setError("");
+    try {
+      const response = await fetch(`/api/posts/${postId}/comments?cursor=${encodeURIComponent(cursor)}`);
+      const result = await response.json();
+      if (!response.ok) throw new Error(result.error || "Could not load comments.");
+      const batch = result as CommentBatch;
+      setComments(current => uniqueComments([...current, ...batch.comments]));
+      setCursor(batch.nextCursor);
+    } catch {
+      setError("Could not load more comments.");
+    } finally {
+      inFlight.current = false;
+      setLoading(false);
+    }
+  }, [cursor, postId]);
+
+  useEffect(() => {
+    if (!sentinel.current || !cursor) return;
+    const observer = new IntersectionObserver(entries => {
+      if (entries[0]?.isIntersecting) void loadMore();
+    }, { rootMargin: "200px" });
+    observer.observe(sentinel.current);
+    return () => observer.disconnect();
+  }, [cursor, loadMore]);
 
   return (
     <>
@@ -30,18 +72,11 @@ export default function CommentList({ data, postId }: { data: CommentsPage; post
           ))}
         </ul>
       )}
-      {pages > 1 && (
-        <nav className={styles.pagination} aria-label="Comment pages">
-          {page > 1 && <Link href={pageUrl(page - 1)}>← Previous</Link>}
-          {visiblePages.map((number, index) => (
-            <span key={number}>
-              {index > 0 && number - visiblePages[index - 1] > 1 && <span className={styles.gap}>…</span>}
-              <Link href={pageUrl(number)} aria-label={`Page ${number}`} aria-current={number === page ? "page" : undefined}>{number}</Link>
-            </span>
-          ))}
-          {page < pages && <Link href={pageUrl(page + 1)}>Next →</Link>}
-        </nav>
-      )}
+      {cursor && <div ref={sentinel} className={styles.sentinel} aria-hidden="true" />}
+      {cursor && <button className={styles.loadMore} type="button" onClick={() => void loadMore()} disabled={loading}>
+        {loading ? "Loading more…" : error ? "Retry loading comments" : "Load more comments"}
+      </button>}
+      {error && <p className={styles.error} role="alert">{error}</p>}
     </>
   );
 }

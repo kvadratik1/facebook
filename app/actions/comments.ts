@@ -30,6 +30,7 @@ export async function createComment(
   }
 
   let post;
+  let commentResult;
   try {
     post = await getPostById(postId);
     if (!post) {
@@ -37,7 +38,8 @@ export async function createComment(
     }
 
     // Identity comes from the session, never from submitted form fields.
-    await addComment({ postId, userId: user.id, text });
+    const comment = await addComment({ postId, userId: user.id, text });
+    commentResult = comment;
   } catch {
     return { error: "Could not save your comment. Please try again.", success: false };
   }
@@ -46,5 +48,5 @@ export async function createComment(
   revalidatePath("/stream");
   revalidatePath(`/users/${post.userId}`);
 
-  return { error: "", success: true };
+  return { error: "", success: true, comment: { ...commentResult, author: user.name, authorAvatarUrl: user.avatarUrl } };
 }
