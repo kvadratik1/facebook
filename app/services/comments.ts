@@ -1,4 +1,4 @@
-import { count, desc, eq, getTableColumns, sql } from "drizzle-orm";
+import { and, count, desc, eq, getTableColumns, sql } from "drizzle-orm";
 import { db } from "../../db";
 import { comments, users, type Comment } from "../../db/schema";
 
@@ -16,6 +16,88 @@ function validatePostId(postId: number) {
   if (!Number.isSafeInteger(postId) || postId <= 0 || postId > 2147483647) {
     throw new Error("Invalid post ID.");
   }
+}
+
+export type CommentBatch = {
+  comments: CommentWithAuthor[];
+  nextCursor: string | null;
+};
+
+type CommentCursor = { postId: number; id: number; createdAt: string };
+
+export class InvalidCommentCursorError extends Error {
+  constructor() {
+    super("Invalid comment cursor.");
+  }
+}
+
+function readCursor(value: string, postId: number): CommentCursor {
+  try {
+    if (typeof value !== "string" || value.length > 512 || !/^[A-Za-z0-9_-]+$/.test(value)) {
+      throw new Error();
+    }
+    const cursor = JSON.parse(Buffer.from(value, "base64url").toString("utf8"));
+    if (
+      !cursor || cursor.postId !== postId ||
+      !Number.isSafeInteger(cursor.id) || cursor.id <= 0 || cursor.id > 2147483647 ||
+      typeof cursor.createdAt !== "string" ||
+      !/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{6}Z$/.test(cursor.createdAt) ||
+      new Date(cursor.createdAt).toISOString().slice(0, 23) !== cursor.createdAt.slice(0, 23)
+    ) {
+      throw new Error();
+    }
+    return cursor;
+  } catch {
+    throw new InvalidCommentCursorError();
+  }
+}
+
+export async function getCommentBatch({ postId, cursor }: {
+  postId: number;
+  cursor?: string;
+}): Promise<CommentBatch> {
+  validatePostId(postId);
+  const bookmark = cursor === undefined ? null : readCursor(cursor, postId);
+  const batchSize = 10;
+
+  const rows = await db.select({
+    ...getTableColumns(comments),
+    author: users.name,
+    authorAvatarUrl: users.avatarUrl,
+    // Keep all six fractional digits for the cursor; JS Date only keeps three.
+    cursorTimestamp: sql<string>`to_char(${comments.createdAt} at time zone 'UTC', 'YYYY-MM-DD"T"HH24:MI:SS.US"Z"')`,
+  })
+    .from(comments)
+    .innerJoin(users, eq(comments.userId, users.id))
+    .where(and(
+      eq(comments.postId, postId),
+      bookmark
+        ? sql`(${comments.createdAt}, ${comments.id}) < (${bookmark.createdAt}::timestamptz, ${bookmark.id}::integer)`
+        : undefined,
+    ))
+    .orderBy(desc(comments.createdAt), desc(comments.id))
+    .limit(batchSize + 1);
+
+  const visibleRows = rows.slice(0, batchSize);
+  const lastComment = visibleRows.at(-1);
+  const hasMore = rows.length > batchSize;
+  const nextCursor = hasMore && lastComment
+    ? Buffer.from(JSON.stringify({
+        postId,
+        id: lastComment.id,
+        createdAt: lastComment.cursorTimestamp,
+      } satisfies CommentCursor)).toString("base64url")
+    : null;
+
+  return {
+    comments: visibleRows.map(row => {
+      // The exact timestamp is only needed inside the next cursor.
+      const { cursorTimestamp, ...comment } = row;
+      void cursorTimestamp;
+      return comment;
+    }),
+    nextCursor,
+  };
 }
 
 export async function getComments({

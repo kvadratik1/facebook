@@ -53,7 +53,7 @@ test('comment SQL: pagination, foreign keys, atomicity and concurrent submission
       const value = Reflect.get(target, key);
       return typeof value === 'function' ? value.bind(target) : value;
     } });
-    const { getComments, addComment } = loadTypescript('app/services/comments.ts', {
+    const { getComments, getCommentBatch, addComment } = loadTypescript('app/services/comments.ts', {
       '../../db': { db }, '../../db/schema': schema,
     });
     const userId = randomUUID();
@@ -66,6 +66,10 @@ test('comment SQL: pagination, foreign keys, atomicity and concurrent submission
       await assert.rejects(getComments({ postId, ...options }));
     }
     for (const text of [' ', 'x'.repeat(1001)]) await assert.rejects(addComment({ postId, userId, text }));
+    assert.deepEqual(await getCommentBatch({ postId }), { comments: [], nextCursor: null });
+    for (const cursor of ['', 'bad', 'a'.repeat(513)]) {
+      await assert.rejects(getCommentBatch({ postId, cursor }), /Invalid comment cursor/);
+    }
     const first = await addComment({ postId, userId, text: ' First comment ' });
     assert.equal(first.text, 'First comment');
     assert.ok(first.createdAt instanceof Date);
@@ -94,11 +98,34 @@ test('comment SQL: pagination, foreign keys, atomicity and concurrent submission
     assert.equal(renamed.comments[0].authorAvatarUrl, 'https://example.com/photo.png');
     await assert.rejects(addComment({ postId: 2147483647, userId, text: 'Missing post' }));
     await assert.rejects(addComment({ postId, userId: randomUUID(), text: 'Missing user' }));
+    // Cursor traversal with exact timestamp ties.
+    const batch1 = await getCommentBatch({ postId });
+    const batch2 = await getCommentBatch({ postId, cursor: batch1.nextCursor });
+    const batch3 = await getCommentBatch({ postId, cursor: batch2.nextCursor });
+    assert.deepEqual([batch1.comments.length, batch2.comments.length, batch3.comments.length], [10, 10, 3]);
+    assert.equal(batch3.nextCursor, null);
+    assert.deepEqual([...batch1.comments, ...batch2.comments, ...batch3.comments].map(row => row.id), tied.comments.map(row => row.id));
+    await assert.rejects(getCommentBatch({ postId: postId + 1, cursor: batch1.nextCursor }), /Invalid comment cursor/);
+    // Sub-millisecond timestamps must not cause missing comments at a batch boundary.
+    await client`update comments set created_at='2026-01-01T00:00:00Z'::timestamptz + id * interval '1 microsecond' where post_id=${postId}`;
+    const precise1 = await getCommentBatch({ postId });
+    const precise2 = await getCommentBatch({ postId, cursor: precise1.nextCursor });
+    const precise3 = await getCommentBatch({ postId, cursor: precise2.nextCursor });
+    assert.deepEqual([...precise1.comments, ...precise2.comments, ...precise3.comments].map(row => row.id), tied.comments.map(row => row.id));
+    // Exactly ten rows should end immediately, without a redundant empty request.
+    const [exactPost] = await client`insert into posts default values returning id`;
+    await client`insert into comments(text,user_id,post_id) select 'Exact batch', ${userId}::uuid, ${exactPost.id} from generate_series(1,10)`;
+    const exact = await getCommentBatch({ postId: exactPost.id });
+    assert.equal(exact.comments.length, 10); assert.equal(exact.nextCursor, null);
+    // A newer comment arriving between requests must not shift the next batch.
+    await addComment({ postId, userId, text: 'New arrival' });
+    const stable = await getCommentBatch({ postId, cursor: precise1.nextCursor });
+    assert.deepEqual(stable.comments.map(row => row.id), precise2.comments.map(row => row.id));
     // Force the counter update to fail after the insert, proving the insert rolls back too.
-    await client`alter table posts add constraint test_counter_limit check (comments <= 23)`;
+    await client`alter table posts add constraint test_counter_limit check (comments <= 24)`;
     await assert.rejects(addComment({ postId, userId, text: 'Must roll back' }));
     const [verified] = await client`select comments, (select count(*)::int from comments where post_id=${postId}) as actual from posts where id=${postId}`;
-    assert.deepEqual(verified, { comments: 23, actual: 23 });
+    assert.deepEqual(verified, { comments: 24, actual: 24 });
   } finally {
     for (const connection of connections) connection.release();
     if (pool) await pool.end();
