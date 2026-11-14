@@ -49,6 +49,17 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     strategy: "jwt",
   },
   callbacks: {
+    async session({ session }) {
+      if (session.user?.email) {
+        const profile = await db.query.users.findFirst({
+          where: eq(users.username, session.user.email),
+          columns: { avatarUrl: true },
+        });
+        // Include the photo in the session response, not in the JWT cookie.
+        session.user.image = profile?.avatarUrl ?? null;
+      }
+      return session;
+    },
     async jwt({ token, trigger }) {
       if (trigger === "update" && token.email) {
         const profile = await db.query.users.findFirst({

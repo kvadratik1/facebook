@@ -1,3 +1,4 @@
+import Avatar from "../../components/avatar";
 import { getCurrentUser } from "../../services/session";
 import Link from "next/link";
 import { notFound } from "next/navigation";
@@ -30,9 +31,7 @@ export default async function PostPage({
           ← All posts
         </Link>
         <header>
-          <span className={styles.avatar} aria-hidden="true">
-            {post.initials}
-          </span>
+          <Avatar src={post.authorAvatarUrl} name={post.author} className={styles.avatar} />
           <div>
             <h1>
               <Link href={`/users/${post.userId}`}>{post.author}</Link>

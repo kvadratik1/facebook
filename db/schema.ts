@@ -79,4 +79,4 @@ export const likes = pgTable("likes", {
   userId: uuid("user_id").notNull().references(() => users.id),
 }, (table) => [primaryKey({ columns: [table.postId, table.userId] })]);
 
-export type PostWithLike = Post & { likedByUser: boolean };
+export type PostWithLike = Post & { likedByUser: boolean; authorAvatarUrl: string | null };

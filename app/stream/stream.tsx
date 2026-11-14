@@ -1,3 +1,4 @@
+import Avatar from "../components/avatar";
 import Link from "next/link";
 import LikeButton from "../components/like-button";
 import { type PostWithLike as Post } from "../../db/schema";
@@ -29,9 +30,7 @@ function FeedPost({ post }: { post: Post }) {
   return (
     <article className={styles.post}>
       <header className={styles.postHeader}>
-        <span className={styles.avatar} aria-hidden="true">
-          {post.initials}
-        </span>
+        <Avatar src={post.authorAvatarUrl} name={post.author} className={styles.avatar} />
         <div>
           <h2>{post.author}</h2>
           <p>{post.time}</p>

@@ -1,5 +1,6 @@
 "use client";
 
+import Avatar from "./avatar";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useSession, signOut } from "next-auth/react";
@@ -9,7 +10,6 @@ export default function NavBar() {
   const pathname = usePathname();
   const { data: session, status } = useSession();
   const name = session?.user?.name || session?.user?.email || "Your account";
-  const initials = name.split(/\s+/).slice(0, 2).map((part) => part[0]).join("").toUpperCase();
 
   return (
     <header className={styles.header}>
@@ -22,7 +22,7 @@ export default function NavBar() {
         <div className={styles.account}>
           {status === "loading" ? <span className={styles.loading}>Loading account…</span> : session ? (
             <>
-              <span className={styles.avatar} aria-hidden="true">{initials}</span>
+              <Avatar src={session.user?.image} name={name} className={styles.avatar} />
               <div className={styles.identity}><span>Signed in as</span><strong>{name}</strong>{session.user?.email && <small>@{session.user.email}</small>}</div>
               <button className={styles.signOut} onClick={() => signOut({ callbackUrl: "/login" })}>Log out</button>
             </>

@@ -10,18 +10,19 @@ function likedByUser(userId?: string) {
 
 export const getPosts = async (userId?: string): Promise<PostWithLike[]> => {
   const result = await db.query.posts.findMany({
-    with: { user: { columns: { name: true } } },
+    with: { user: { columns: { name: true, avatarUrl: true } } },
     extras: { likedByUser: likedByUser(userId) },
   });
   return result.map(withCurrentAuthor);
 };
 
 // Author names on existing posts follow profile edits too.
-function withCurrentAuthor({ user, ...post }: PostWithLike & { user: { name: string } | null }): PostWithLike {
-  if (!user) return post;
+function withCurrentAuthor({ user, ...post }: Post & { likedByUser: boolean; user: { name: string; avatarUrl: string | null } | null }): PostWithLike {
+  if (!user) return { ...post, authorAvatarUrl: null };
   return {
     ...post,
     author: user.name,
+    authorAvatarUrl: user.avatarUrl,
     initials: user.name.trim().split(/\s+/).slice(0, 2).map(part => part[0]).join("").toUpperCase(),
   };
 }
@@ -60,7 +61,7 @@ export const addPost = async (text: string, userId: string): Promise<Post> => {
 export const getPostById = async (id: number, userId?: string): Promise<PostWithLike | undefined> => {
   const post = await db.query.posts.findFirst({
     where: eq(posts.id, id),
-    with: { user: { columns: { name: true } } },
+    with: { user: { columns: { name: true, avatarUrl: true } } },
     extras: { likedByUser: likedByUser(userId) },
   });
   return post ? withCurrentAuthor(post) : undefined;
