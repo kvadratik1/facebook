@@ -1,0 +1,29 @@
+.section { width: min(100% - 40px, 680px); margin: 0 auto; padding: 0 0 72px; scroll-margin-top: 24px; }
+.heading { display: flex; align-items: baseline; flex-wrap: wrap; gap: 12px; padding-top: 28px; border-top: 1px solid #dedbd2; }
+.heading h2 { margin: 0; font: 28px Georgia, serif; }
+.heading span, .empty, .login { color: #76736b; font-size: 14px; }
+.login a, .meta a { color: #6d5437; text-underline-offset: 3px; }
+.form { margin-top: 28px; }
+.form label { display: block; margin-bottom: 10px; font-size: 14px; font-weight: 700; }
+.form textarea { width: 100%; box-sizing: border-box; resize: vertical; padding: 14px; border: 1px solid #dedbd2; border-radius: 8px; background: #fffdf7; color: #24231f; font: inherit; line-height: 1.5; }
+.controls { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; margin-top: 12px; }
+.controls span { color: #76736b; font-size: 12px; }
+.controls button { border: 0; border-radius: 6px; padding: 11px 16px; background: #344b3d; color: white; cursor: pointer; font: inherit; font-size: 13px; }
+.controls button:disabled { opacity: .5; cursor: not-allowed; }
+.status, .error { min-height: 20px; margin: 10px 0; font-size: 13px; }
+.status { color: #344b3d; }
+.error { color: #a33535; }
+.list { list-style: none; margin: 24px 0 0; padding: 0; }
+.comment { display: flex; gap: 12px; padding: 24px 0; border-top: 1px solid #e6e2d9; }
+.avatar { display: grid; place-items: center; flex: 0 0 38px; width: 38px; height: 38px; border-radius: 50%; background: #e7ebdf; color: #46573c; font-size: 12px; font-weight: 700; }
+.content { min-width: 0; flex: 1; }
+.meta { display: flex; flex-wrap: wrap; align-items: baseline; gap: 8px 14px; }
+.meta a { font-size: 14px; font-weight: 700; overflow-wrap: anywhere; }
+.meta time { color: #76736b; font-size: 12px; }
+.text { margin: 10px 0 0; white-space: pre-wrap; overflow-wrap: anywhere; line-height: 1.6; font-size: 14px; }
+.empty { padding: 24px 0; }
+.pagination { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-top: 24px; }
+.pagination a { display: inline-block; padding: 8px 11px; border: 1px solid #dedbd2; border-radius: 5px; text-decoration: none; color: #6d5437; font-size: 13px; }
+.pagination a[aria-current] { background: #344b3d; color: white; border-color: #344b3d; }
+.gap { padding: 0 8px; }
+.section a:focus-visible, .form textarea:focus-visible, .form button:focus-visible { outline: 2px solid #576e4e; outline-offset: 3px; }

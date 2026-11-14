@@ -2,7 +2,7 @@ import { count, desc, eq, getTableColumns, sql } from "drizzle-orm";
 import { db } from "../../db";
 import { comments, users, type Comment } from "../../db/schema";
 
-export type CommentWithAuthor = Comment & { author: string };
+export type CommentWithAuthor = Comment & { author: string; authorAvatarUrl: string | null };
 
 export type CommentsPage = {
   comments: CommentWithAuthor[];
@@ -45,7 +45,7 @@ export async function getComments({
       .from(comments)
       .where(eq(comments.postId, postId)),
 
-    db.select({ ...getTableColumns(comments), author: users.name })
+    db.select({ ...getTableColumns(comments), author: users.name, authorAvatarUrl: users.avatarUrl })
       .from(comments)
       .innerJoin(users, eq(comments.userId, users.id))
       .where(eq(comments.postId, postId))
