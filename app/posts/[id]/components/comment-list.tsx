@@ -31,7 +31,6 @@ export default function CommentList({ initialBatch, newComments, postId }: {
     if (!cursor || inFlight.current) return;
     inFlight.current = true;
     setLoading(true);
-    setError("");
     try {
       const response = await fetch(`/api/posts/${postId}/comments?cursor=${encodeURIComponent(cursor)}`);
       const result = await response.json();
@@ -43,6 +42,7 @@ export default function CommentList({ initialBatch, newComments, postId }: {
       }));
       setComments(current => uniqueComments([...current, ...olderComments]));
       setCursor(batch.nextCursor);
+      setError("");
     } catch {
       setError("Could not load more comments.");
     } finally {
@@ -52,13 +52,13 @@ export default function CommentList({ initialBatch, newComments, postId }: {
   }, [cursor, postId]);
 
   useEffect(() => {
-    if (!sentinel.current || !cursor) return;
+    if (!sentinel.current || !cursor || error) return;
     const observer = new IntersectionObserver(entries => {
       if (entries[0]?.isIntersecting) void loadMore();
     }, { rootMargin: "200px" });
     observer.observe(sentinel.current);
     return () => observer.disconnect();
-  }, [cursor, loadMore]);
+  }, [cursor, error, loadMore]);
 
   return (
     <>
@@ -81,10 +81,14 @@ export default function CommentList({ initialBatch, newComments, postId }: {
         </ul>
       )}
       {cursor && <div ref={sentinel} className={styles.sentinel} aria-hidden="true" />}
-      {cursor && <button className={styles.loadMore} type="button" onClick={() => void loadMore()} disabled={loading}>
-        {loading ? "Loading more…" : error ? "Retry loading comments" : "Load more comments"}
-      </button>}
-      {error && <p className={styles.error} role="alert">{error}</p>}
+      {loading ? (
+        <p className={styles.status} role="status">Loading more comments…</p>
+      ) : error && <p className={styles.error} role="alert">{error}</p>}
+      {error && (
+        <button className={styles.retry} type="button" onClick={() => void loadMore()} disabled={loading}>
+          Retry
+        </button>
+      )}
     </>
   );
 }
