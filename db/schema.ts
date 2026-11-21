@@ -1,6 +1,6 @@
-import { pgTable, serial, text, integer, uuid, varchar, primaryKey, timestamp, index } from "drizzle-orm/pg-core";
+import { pgTable, serial, text, integer, uuid, varchar, primaryKey, timestamp, index, check } from "drizzle-orm/pg-core";
 
-import { relations } from "drizzle-orm";
+import { relations, sql } from "drizzle-orm";
 
 export const posts = pgTable("posts", {
   id: serial("id").primaryKey(),
@@ -80,3 +80,12 @@ export const likes = pgTable("likes", {
 }, (table) => [primaryKey({ columns: [table.postId, table.userId] })]);
 
 export type PostWithLike = Post & { likedByUser: boolean; authorAvatarUrl: string | null };
+
+export const follows = pgTable("follows", {
+  followerId: uuid("follower_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  followingId: uuid("following_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+}, (table) => [
+  primaryKey({ columns: [table.followerId, table.followingId] }),
+  index("follows_following_id_follower_id_idx").on(table.followingId, table.followerId),
+  check("follows_no_self_follow", sql`${table.followerId} <> ${table.followingId}`),
+]);
