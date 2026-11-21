@@ -1,4 +1,4 @@
-name: CI/CD
+name: CI
 
 on:
   pull_request:
@@ -9,7 +9,7 @@ permissions:
   contents: read
 
 jobs:
-  check-and-deploy:
+  check:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
@@ -22,10 +22,3 @@ jobs:
       - run: npm ci
       - run: npm run lint
       - run: npx next typegen && npx tsc --noEmit
-      - name: Deploy to Vercel
-        if: github.event_name == 'push'
-        env:
-          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
-          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
-          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
-        run: npx --yes vercel deploy --prod --token="${VERCEL_TOKEN:?}" --project="${VERCEL_PROJECT_ID:?}"
