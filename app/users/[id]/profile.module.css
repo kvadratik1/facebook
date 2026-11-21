@@ -26,6 +26,10 @@
 .username { margin: 8px 0 20px; color: #76736b; font-size: 14px; overflow-wrap: anywhere; }
 .bio { margin: 0; max-width: 580px; line-height: 1.7; white-space: pre-wrap; overflow-wrap: anywhere; }
 .muted { color: #76736b; font-size: 14px; }
+.followRow { display: flex; align-items: center; flex-wrap: wrap; gap: 12px 20px; margin-top: 20px; }
+.followCounts { display: flex; align-items: center; flex-wrap: wrap; gap: 8px 16px; color: #665d50; font-size: 14px; }
+.followCounts strong { color: #342e26; }
+.followRow button:disabled { cursor: not-allowed; }
 .posts { margin-top: 40px; }
 .sectionHeading { display: flex; align-items: baseline; gap: 12px; padding-bottom: 14px; border-bottom: 1px solid #dedbd2; }
 .sectionHeading h2 { margin: 0; font-size: 13px; text-transform: uppercase; letter-spacing: .1em; }
@@ -41,7 +45,7 @@
 .empty p { color: #76736b; margin: 0 0 20px; line-height: 1.6; }
 .actions { display: flex; gap: 20px; justify-content: center; align-items: center; flex-wrap: wrap; }
 .skeleton { background: #eee8dc; height: 20px; max-width: 260px; border-radius: 4px; margin: 16px 0; }
-.page a:focus-visible, .edit:focus-visible { outline: 2px solid #7b6446; outline-offset: 4px; }
+.page a:focus-visible, .edit:focus-visible, .followRow button:focus-visible { outline: 2px solid #7b6446; outline-offset: 4px; }
 @media (max-width: 560px) {
   .page { width: calc(100% - 24px); padding-top: 24px; }
   .details { padding: 0 20px 24px; }
