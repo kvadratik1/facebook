@@ -1,4 +1,4 @@
-import { getCommentBatch } from "../../services/comments";
+import { getCommentBatch, getCommentCount } from "../../services/comments";
 import CommentSection from "./components/comment-section";
 import Avatar from "../../components/avatar";
 import { getCurrentUser } from "../../services/session";
@@ -23,7 +23,10 @@ export default async function PostPage({
     notFound();
   }
 
-  const commentBatch = await getCommentBatch({ postId });
+  const [commentBatch, commentCount] = await Promise.all([
+    getCommentBatch({ postId }),
+    getCommentCount(postId),
+  ]);
 
   return (
     <main className={styles.page}>
@@ -53,7 +56,7 @@ export default async function PostPage({
           />
         </div>
       </article>
-      <CommentSection postId={postId} initialBatch={commentBatch} initialCount={post.comments}
+      <CommentSection postId={postId} initialBatch={commentBatch} initialCount={commentCount}
         signedInUser={user ? { id: user.id, name: user.name, avatarUrl: user.avatarUrl } : null} />
     </main>
   );

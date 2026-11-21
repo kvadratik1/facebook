@@ -53,7 +53,7 @@ test('comment SQL: pagination, foreign keys, atomicity and concurrent submission
       const value = Reflect.get(target, key);
       return typeof value === 'function' ? value.bind(target) : value;
     } });
-    const { getComments, getCommentBatch, addComment } = loadTypescript('app/services/comments.ts', {
+    const { getComments, getCommentBatch, getCommentCount, addComment } = loadTypescript('app/services/comments.ts', {
       '../../db': { db }, '../../db/schema': schema,
     });
     const userId = randomUUID();
@@ -113,10 +113,11 @@ test('comment SQL: pagination, foreign keys, atomicity and concurrent submission
     const precise3 = await getCommentBatch({ postId, cursor: precise2.nextCursor });
     assert.deepEqual([...precise1.comments, ...precise2.comments, ...precise3.comments].map(row => row.id), tied.comments.map(row => row.id));
     // Exactly ten rows should end immediately, without a redundant empty request.
-    const [exactPost] = await client`insert into posts default values returning id`;
+    const [exactPost] = await client`insert into posts(comments) values (14) returning id`;
     await client`insert into comments(text,user_id,post_id) select 'Exact batch', ${userId}::uuid, ${exactPost.id} from generate_series(1,10)`;
     const exact = await getCommentBatch({ postId: exactPost.id });
     assert.equal(exact.comments.length, 10); assert.equal(exact.nextCursor, null);
+    assert.equal(await getCommentCount(exactPost.id), 10);
     // A newer comment arriving between requests must not shift the next batch.
     await addComment({ postId, userId, text: 'New arrival' });
     const stable = await getCommentBatch({ postId, cursor: precise1.nextCursor });

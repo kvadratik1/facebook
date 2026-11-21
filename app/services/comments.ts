@@ -100,6 +100,14 @@ export async function getCommentBatch({ postId, cursor }: {
   };
 }
 
+export async function getCommentCount(postId: number): Promise<number> {
+  validatePostId(postId);
+  const [row] = await db.select({ total: count() })
+    .from(comments)
+    .where(eq(comments.postId, postId));
+  return row.total;
+}
+
 export async function getComments({
   postId,
   page = 1,
@@ -122,10 +130,8 @@ export async function getComments({
   }
 
   // Fetch the total count and the requested comments as two independent queries.
-  const [countRows, pageComments] = await Promise.all([
-    db.select({ total: count() })
-      .from(comments)
-      .where(eq(comments.postId, postId)),
+  const [total, pageComments] = await Promise.all([
+    getCommentCount(postId),
 
     db.select({ ...getTableColumns(comments), author: users.name, authorAvatarUrl: users.avatarUrl })
       .from(comments)
@@ -135,8 +141,6 @@ export async function getComments({
       .limit(size)
       .offset(offset),
   ]);
-
-  const total = countRows[0].total;
 
   return {
     comments: pageComments,

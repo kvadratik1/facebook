@@ -6,6 +6,10 @@ import Avatar from "../../../components/avatar";
 import type { CommentBatch, CommentWithAuthor } from "../../../services/comments";
 import styles from "./comments.module.css";
 
+type CommentBatchJson = Omit<CommentBatch, "comments"> & {
+  comments: (Omit<CommentWithAuthor, "createdAt"> & { createdAt: string })[];
+};
+
 function uniqueComments(comments: CommentWithAuthor[]) {
   return [...new Map(comments.map(comment => [comment.id, comment])).values()];
 }
@@ -32,8 +36,12 @@ export default function CommentList({ initialBatch, newComments, postId }: {
       const response = await fetch(`/api/posts/${postId}/comments?cursor=${encodeURIComponent(cursor)}`);
       const result = await response.json();
       if (!response.ok) throw new Error(result.error || "Could not load comments.");
-      const batch = result as CommentBatch;
-      setComments(current => uniqueComments([...current, ...batch.comments]));
+      const batch = result as CommentBatchJson;
+      const olderComments = batch.comments.map(comment => ({
+        ...comment,
+        createdAt: new Date(comment.createdAt),
+      }));
+      setComments(current => uniqueComments([...current, ...olderComments]));
       setCursor(batch.nextCursor);
     } catch {
       setError("Could not load more comments.");
