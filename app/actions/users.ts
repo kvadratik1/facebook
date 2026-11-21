@@ -2,7 +2,7 @@
 
 import { redirect } from "next/navigation";
 import bcrypt from "bcryptjs";
-import { db } from "../../db";
+import { getDb } from "../../db";
 import { users } from "../../db/schema";
 import { eq } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
@@ -45,7 +45,7 @@ export async function updateProfile(
 
   try {
     // The target always comes from the session, never a submitted user ID.
-    const [saved] = await db.update(users).set({
+    const [saved] = await getDb().update(users).set({
       name: name.trim(),
       bio: bio.trim() || null,
       ...(avatarUrl !== undefined ? { avatarUrl, avatarPublicId: null } : {}),
@@ -83,7 +83,7 @@ export const registerUser = async (
 
   const passwordHash = await bcrypt.hash(password, 10);
 
-  const [user] = await db.insert(users)
+  const [user] = await getDb().insert(users)
     .values({ username, name, passwordHash })
     .onConflictDoNothing({ target: users.username })
     .returning({ id: users.id });

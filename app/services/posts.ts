@@ -1,5 +1,5 @@
 import { eq, sql } from "drizzle-orm";
-import { db } from "../../db";
+import { getDb } from "../../db";
 import { posts, users, type Post, type PostWithLike } from "../../db/schema";
 
 function likedByUser(userId?: string) {
@@ -9,7 +9,7 @@ function likedByUser(userId?: string) {
 }
 
 export const getPosts = async (userId?: string): Promise<PostWithLike[]> => {
-  const result = await db.query.posts.findMany({
+  const result = await getDb().query.posts.findMany({
     with: { user: { columns: { name: true, avatarUrl: true } } },
     extras: { likedByUser: likedByUser(userId) },
   });
@@ -30,14 +30,14 @@ function withCurrentAuthor({ user, ...post }: Post & { likedByUser: boolean; use
 export const addPost = async (text: string, userId: string): Promise<Post> => {
   const content = text.trim();
 
-  const user = await db.query.users.findFirst({
+  const user = await getDb().query.users.findFirst({
     where: eq(users.id, userId),
   });
   if (!user) {
     throw new Error("User not found.");
   }
 
-  const [post] = await db
+  const [post] = await getDb()
     .insert(posts)
     .values({
       text: content,
@@ -59,7 +59,7 @@ export const addPost = async (text: string, userId: string): Promise<Post> => {
 };
 
 export const getPostById = async (id: number, userId?: string): Promise<PostWithLike | undefined> => {
-  const post = await db.query.posts.findFirst({
+  const post = await getDb().query.posts.findFirst({
     where: eq(posts.id, id),
     with: { user: { columns: { name: true, avatarUrl: true } } },
     extras: { likedByUser: likedByUser(userId) },
@@ -75,7 +75,7 @@ export const setPostLike = async (id: number, userId: string, liked: boolean) =>
         on conflict (post_id, user_id) do nothing returning post_id`
     : sql`delete from likes where post_id = ${id} and user_id = ${userId}::uuid
         returning post_id`;
-  const result = await db.execute<{ user_id: string }>(sql`
+  const result = await getDb().execute<{ user_id: string }>(sql`
     with changed as (${change})
     update posts set likes = posts.likes + ${liked ? 1 : -1} * (select count(*)::int from changed)
     where posts.id = ${id}
@@ -85,7 +85,7 @@ export const setPostLike = async (id: number, userId: string, liked: boolean) =>
 };
 
 export const getPostsByUserId = async (userId: string) => {
-  return db.query.posts.findMany({
+  return getDb().query.posts.findMany({
     where: eq(posts.userId, userId),
   });
 };

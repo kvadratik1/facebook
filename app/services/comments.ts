@@ -1,5 +1,5 @@
 import { and, count, desc, eq, getTableColumns, sql } from "drizzle-orm";
-import { db } from "../../db";
+import { getDb } from "../../db";
 import { comments, users, type Comment } from "../../db/schema";
 
 export type CommentWithAuthor = Comment & { author: string; authorAvatarUrl: string | null };
@@ -60,7 +60,7 @@ export async function getCommentBatch({ postId, cursor }: {
   const bookmark = cursor === undefined ? null : readCursor(cursor, postId);
   const batchSize = 10;
 
-  const rows = await db.select({
+  const rows = await getDb().select({
     ...getTableColumns(comments),
     author: users.name,
     authorAvatarUrl: users.avatarUrl,
@@ -102,7 +102,7 @@ export async function getCommentBatch({ postId, cursor }: {
 
 export async function getCommentCount(postId: number): Promise<number> {
   validatePostId(postId);
-  const [row] = await db.select({ total: count() })
+  const [row] = await getDb().select({ total: count() })
     .from(comments)
     .where(eq(comments.postId, postId));
   return row.total;
@@ -133,7 +133,7 @@ export async function getComments({
   const [total, pageComments] = await Promise.all([
     getCommentCount(postId),
 
-    db.select({ ...getTableColumns(comments), author: users.name, authorAvatarUrl: users.avatarUrl })
+    getDb().select({ ...getTableColumns(comments), author: users.name, authorAvatarUrl: users.avatarUrl })
       .from(comments)
       .innerJoin(users, eq(comments.userId, users.id))
       .where(eq(comments.postId, postId))
@@ -167,7 +167,7 @@ export async function addComment({ postId, userId, text }: {
 
   // A single statement works with Neon HTTP and rolls back both changes on failure.
   // Foreign keys enforce that both the post and the user exist.
-  const result = await db.execute<{
+  const result = await getDb().execute<{
     id: number;
     text: string;
     userId: string;

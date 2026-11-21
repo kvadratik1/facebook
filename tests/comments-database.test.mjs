@@ -54,7 +54,7 @@ test('comment SQL: pagination, foreign keys, atomicity and concurrent submission
       return typeof value === 'function' ? value.bind(target) : value;
     } });
     const { getComments, getCommentBatch, getCommentCount, addComment } = loadTypescript('app/services/comments.ts', {
-      '../../db': { db }, '../../db/schema': schema,
+      '../../db': { getDb: () => db }, '../../db/schema': schema,
     });
     const userId = randomUUID();
     await client`insert into users values (${userId}, 'Test Author', null)`;

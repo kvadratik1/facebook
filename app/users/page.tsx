@@ -1,7 +1,9 @@
 import Link from "next/link";
+import { connection } from "next/server";
 import { getUsers } from "../services/users";
 
 export default async function Users() {
+  await connection();
   const users = await getUsers();
 
   return (

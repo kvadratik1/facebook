@@ -2,7 +2,7 @@ import NextAuth from "next-auth";
 import Credentials from "next-auth/providers/credentials";
 import { eq } from "drizzle-orm";
 import bcrypt from "bcryptjs";
-import { db } from "../db";
+import { getDb } from "../db";
 import { users } from "../db/schema";
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
@@ -17,7 +17,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
           return null;
         }
 
-        const user = await db.query.users.findFirst({
+        const user = await getDb().query.users.findFirst({
           where: eq(users.username, credentials.username as string),
         });
 
@@ -51,7 +51,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
   callbacks: {
     async session({ session }) {
       if (session.user?.email) {
-        const profile = await db.query.users.findFirst({
+        const profile = await getDb().query.users.findFirst({
           where: eq(users.username, session.user.email),
           columns: { avatarUrl: true },
         });
@@ -62,7 +62,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     },
     async jwt({ token, trigger }) {
       if (trigger === "update" && token.email) {
-        const profile = await db.query.users.findFirst({
+        const profile = await getDb().query.users.findFirst({
           where: eq(users.username, token.email),
           columns: { name: true },
         });

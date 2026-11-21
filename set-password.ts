@@ -11,11 +11,11 @@ async function setPassword(username: string, password: string) {
     );
   }
 
-  const { db } = await import("./db");
+  const { getDb } = await import("./db");
   const { users } = await import("./db/schema");
   const hash = await bcrypt.hash(password, 10);
 
-  const updated = await db
+  const updated = await getDb()
     .update(users)
     .set({ passwordHash: hash })
     .where(eq(users.username, username))
