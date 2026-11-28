@@ -40,6 +40,68 @@
   box-shadow: 0 2px 0 #7b6446;
 }
 
+.photoPicker {
+  display: grid;
+  gap: 6px;
+  justify-items: start;
+  color: #24231f;
+  font-size: 13px;
+}
+
+.photoPicker label {
+  font-weight: 700;
+}
+
+.photoPicker input {
+  max-width: 100%;
+}
+
+.photoPicker > p {
+  margin: 0;
+  color: #665d50;
+}
+
+.attachment {
+  display: grid;
+  gap: 8px;
+  width: 100%;
+  justify-items: start;
+  margin-top: 4px;
+}
+
+.preview {
+  position: relative;
+  width: min(100%, 280px);
+  aspect-ratio: 4 / 3;
+  background: #eee8dc;
+}
+
+.preview img {
+  object-fit: contain;
+}
+
+.attachment button {
+  padding: 4px 0;
+  color: #66533c;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.attachment button:disabled {
+  opacity: 0.6;
+  cursor: wait;
+}
+
+.error {
+  margin: 0;
+  color: #9a3026;
+  font-size: 13px;
+}
+
+.error:empty {
+  display: none;
+}
+
 .controls {
   display: flex;
   align-items: center;

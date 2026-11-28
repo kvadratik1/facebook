@@ -1,9 +1,13 @@
 "use server";
 
+import { randomUUID } from "node:crypto";
+import { del, put } from "@vercel/blob";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
-import { setPostLike, addPost } from "../services/posts";
+import sharp from "sharp";
+import { setPostLike, addPost, getPostByPhotoKey } from "../services/posts";
 import { getCurrentUser } from "../services/session";
+import { validatePostPhoto } from "../stream/post-photo";
 
 export const createPost = async (
   _prevState: { error: string; success: boolean },
@@ -29,7 +33,60 @@ export const createPost = async (
     return { error: "Post contains a blocked word.", success: false };
   }
 
-  await addPost(content, user.id);
+  const attachments = formData.getAll("photo");
+  const photo = attachments[0];
+  if (attachments.length > 1 || (photo !== undefined && !(photo instanceof File))) {
+    return { error: "Choose one photo per post.", success: false };
+  }
+
+  let photoKey: string | undefined;
+  if (photo) {
+    const error = validatePostPhoto(photo);
+    if (error) return { error, success: false };
+
+    let image: Buffer;
+    try {
+      const source = sharp(Buffer.from(await photo.arrayBuffer()), { limitInputPixels: 40_000_000 });
+      const { format } = await source.metadata();
+      if (format !== "jpeg" && format !== "png" && format !== "webp") {
+        return { error: "Choose a JPEG, PNG, or WebP photo.", success: false };
+      }
+      image = await source
+        .autoOrient()
+        .resize({ width: 2000, height: 2000, fit: "inside", withoutEnlargement: true })
+        .webp()
+        .toBuffer();
+    } catch {
+      return { error: "This photo couldn’t be processed. Choose another photo.", success: false };
+    }
+
+    try {
+      const uploaded = await put(`post-photos/${randomUUID()}.webp`, image, {
+        access: "public",
+        contentType: "image/webp",
+      });
+      photoKey = uploaded.pathname;
+    } catch {
+      return { error: "Could not upload your photo. Please try again.", success: false };
+    }
+  }
+
+  try {
+    await addPost(content, user.id, photoKey);
+  } catch {
+    if (!photoKey) return { error: "Could not save your post. Please try again.", success: false };
+    let savedPost;
+    try {
+      // A lost database response can mean the insert succeeded. Check before deleting its photo.
+      savedPost = await getPostByPhotoKey(photoKey);
+    } catch {
+      return { error: "Could not confirm that your post was saved. Check the feed before retrying.", success: false };
+    }
+    if (!savedPost) {
+      await del(photoKey).catch(() => console.error("Could not remove unused post photo:", photoKey));
+      return { error: "Could not save your post. Please try again.", success: false };
+    }
+  }
   revalidatePath("/stream");
   return { error: "", success: true };
 };

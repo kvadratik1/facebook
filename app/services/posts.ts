@@ -27,7 +27,7 @@ function withCurrentAuthor({ user, ...post }: Post & { likedByUser: boolean; use
   };
 }
 
-export const addPost = async (text: string, userId: string): Promise<Post> => {
+export const addPost = async (text: string, userId: string, photoKey?: string): Promise<Post> => {
   const content = text.trim();
 
   const user = await getDb().query.users.findFirst({
@@ -41,6 +41,7 @@ export const addPost = async (text: string, userId: string): Promise<Post> => {
     .insert(posts)
     .values({
       text: content,
+      photoKey,
       userId: user.id,
       author: user.name,
       initials: user.name
@@ -57,6 +58,11 @@ export const addPost = async (text: string, userId: string): Promise<Post> => {
 
   return post;
 };
+
+export const getPostByPhotoKey = (photoKey: string) => getDb().query.posts.findFirst({
+  where: eq(posts.photoKey, photoKey),
+  columns: { id: true },
+});
 
 export const getPostById = async (id: number, userId?: string): Promise<PostWithLike | undefined> => {
   const post = await getDb().query.posts.findFirst({
