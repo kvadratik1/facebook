@@ -1,0 +1,13 @@
+.photo {
+  position: relative;
+  width: min(100%, 680px);
+  aspect-ratio: 4 / 3;
+  margin: 20px 0;
+  overflow: hidden;
+  border-radius: 4px;
+  background: #f1eee6;
+}
+
+.photo img {
+  object-fit: contain;
+}

@@ -1,4 +1,15 @@
-import { pgTable, serial, text, integer, uuid, varchar, primaryKey, timestamp, index, check } from "drizzle-orm/pg-core";
+import {
+  pgTable,
+  serial,
+  text,
+  integer,
+  uuid,
+  varchar,
+  primaryKey,
+  timestamp,
+  index,
+  check,
+} from "drizzle-orm/pg-core";
 
 import { relations, sql } from "drizzle-orm";
 
@@ -34,17 +45,29 @@ export const users = pgTable("users", {
   coverImagePublicId: text("cover_image_public_id"),
 });
 
-export const comments = pgTable("comments", {
-  id: serial("id").primaryKey(),
-  text: text("text").notNull(),
-  userId: uuid("user_id").notNull().references(() => users.id),
-  postId: integer("post_id")
-    .notNull()
-    .references(() => posts.id, { onDelete: "cascade" }),
-  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
-}, (table) => [
-  index("comments_post_id_created_at_id_idx").on(table.postId, table.createdAt, table.id),
-]);
+export const comments = pgTable(
+  "comments",
+  {
+    id: serial("id").primaryKey(),
+    text: text("text").notNull(),
+    userId: uuid("user_id")
+      .notNull()
+      .references(() => users.id),
+    postId: integer("post_id")
+      .notNull()
+      .references(() => posts.id, { onDelete: "cascade" }),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+  },
+  (table) => [
+    index("comments_post_id_created_at_id_idx").on(
+      table.postId,
+      table.createdAt,
+      table.id
+    ),
+  ]
+);
 
 export type Comment = typeof comments.$inferSelect;
 export type NewComment = typeof comments.$inferInsert;
@@ -75,18 +98,43 @@ export const postsRelations = relations(posts, ({ one, many }) => ({
 }));
 
 // One like per user per post; post-first key also supports post lookups.
-export const likes = pgTable("likes", {
-  postId: integer("post_id").notNull().references(() => posts.id, { onDelete: "cascade" }),
-  userId: uuid("user_id").notNull().references(() => users.id),
-}, (table) => [primaryKey({ columns: [table.postId, table.userId] })]);
+export const likes = pgTable(
+  "likes",
+  {
+    postId: integer("post_id")
+      .notNull()
+      .references(() => posts.id, { onDelete: "cascade" }),
+    userId: uuid("user_id")
+      .notNull()
+      .references(() => users.id),
+  },
+  (table) => [primaryKey({ columns: [table.postId, table.userId] })]
+);
 
-export type PostWithLike = Post & { likedByUser: boolean; authorAvatarUrl: string | null };
+export type PostWithLike = Post & {
+  likedByUser: boolean;
+  authorAvatarUrl: string | null;
+};
 
-export const follows = pgTable("follows", {
-  followerId: uuid("follower_id").notNull().references(() => users.id, { onDelete: "cascade" }),
-  followingId: uuid("following_id").notNull().references(() => users.id, { onDelete: "cascade" }),
-}, (table) => [
-  primaryKey({ columns: [table.followerId, table.followingId] }),
-  index("follows_following_id_follower_id_idx").on(table.followingId, table.followerId),
-  check("follows_no_self_follow", sql`${table.followerId} <> ${table.followingId}`),
-]);
+export const follows = pgTable(
+  "follows",
+  {
+    followerId: uuid("follower_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    followingId: uuid("following_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+  },
+  (table) => [
+    primaryKey({ columns: [table.followerId, table.followingId] }),
+    index("follows_following_id_follower_id_idx").on(
+      table.followingId,
+      table.followerId
+    ),
+    check(
+      "follows_no_self_follow",
+      sql`${table.followerId} <> ${table.followingId}`
+    ),
+  ]
+);

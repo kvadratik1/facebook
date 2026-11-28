@@ -6,6 +6,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getPostById } from "../../services/posts";
 import LikeButton from "../../components/like-button";
+import PostPhoto from "../../components/post-photo";
 import styles from "./post.module.css";
 
 export default async function PostPage({
@@ -47,6 +48,7 @@ export default async function PostPage({
           </div>
         </header>
         <p className={styles.text}>{post.text}</p>
+        <PostPhoto photoKey={post.photoKey} author={post.author} />
         <div className={styles.actions}>
           <LikeButton
             postId={post.id}

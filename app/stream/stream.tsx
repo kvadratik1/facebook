@@ -1,6 +1,7 @@
 import Avatar from "../components/avatar";
 import Link from "next/link";
 import LikeButton from "../components/like-button";
+import PostPhoto from "../components/post-photo";
 import { type PostWithLike as Post } from "../../db/schema";
 import CreatePost from "./components/create-post";
 import styles from "./stream.module.css";
@@ -38,7 +39,8 @@ function FeedPost({ post }: { post: Post }) {
       </header>
 
       <p className={styles.postText}>{post.text}</p>
-      {post.media && <PostMedia type={post.media} />}
+      <PostPhoto photoKey={post.photoKey} author={post.author} />
+      {!post.photoKey && post.media && <PostMedia type={post.media} />}
 
       <footer className={styles.postFooter}>
         <LikeButton postId={post.id} likes={post.likes} author={post.author} likedByUser={post.likedByUser} />

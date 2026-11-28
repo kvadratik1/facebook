@@ -1,4 +1,5 @@
 import Link from "next/link";
+import PostPhoto from "@/app/components/post-photo";
 import type { Post } from "@/db/schema";
 import styles from "../profile.module.css";
 
@@ -12,6 +13,7 @@ export default function ProfilePosts({ posts, isOwner }: { posts: Post[]; isOwne
             <li key={post.id} className={styles.post}>
               <article>
                 <p className={styles.postText}>{post.text}</p>
+                <PostPhoto photoKey={post.photoKey} author={post.author} />
                 <div className={styles.postFooter}>
                   <span>{post.likes} likes · {post.comments} comments</span>
                   <Link href={`/posts/${post.id}`}>View post →</Link>

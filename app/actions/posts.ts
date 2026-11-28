@@ -88,6 +88,7 @@ export const createPost = async (
     }
   }
   revalidatePath("/stream");
+  revalidatePath(`/users/${user.id}`);
   return { error: "", success: true };
 };
 
