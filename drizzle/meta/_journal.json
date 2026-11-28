@@ -78,6 +78,13 @@
       "when": 1795261440661,
       "tag": "0010_add_follows",
       "breakpoints": true
+    },
+    {
+      "idx": 11,
+      "version": "7",
+      "when": 1795862937875,
+      "tag": "0011_add_post_photo",
+      "breakpoints": true
     }
   ]
 }

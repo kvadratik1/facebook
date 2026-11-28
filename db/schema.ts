@@ -13,6 +13,7 @@ export const posts = pgTable("posts", {
   comments: integer("comments").notNull().default(0),
   shares: integer("shares").notNull().default(0),
   media: text("media"),
+  photoKey: text("photo_key"),
   userId: uuid("user_id")
     .notNull()
     .references(() => users.id),
